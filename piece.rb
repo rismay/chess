@@ -9,11 +9,11 @@ class Piece
   end
 
   def available_moves
-    raise NoMethodError
+    raise NotImplementedError
   end
 
   def deltas
-    raise NoMethodError
+    raise NotImplementedError
   end
 
   def black?
@@ -33,9 +33,9 @@ class Piece
   end
 
   def to_s
-    # self.class.to_s[0..1]
+    self.class.to_s[0..1]
     # self.pos.to_s
-    self.color.to_s
+    # self.color.to_s
   end
 
   protected
@@ -43,6 +43,8 @@ class Piece
 end
 
 class SlidingPiece < Piece
+  DELTA_T = [[1,0],[0,1],[0,-1],[-1,0]]
+  DELTA_X = [[1,1],[1,-1],[-1,1],[-1,-1]]
 
   def available_moves
     [].tap do |moves_array|
@@ -75,30 +77,27 @@ class SlidingPiece < Piece
 end
 
 class Rook < SlidingPiece
-  DELTA = [[1,0],[0,1],[0,-1],[-1,0]]
-
   def deltas
-    DELTA
+    SlidingPiece::DELTA_T
   end
 end
 
 class Bishop < SlidingPiece
-  DELTA = [[1,1],[1,-1],[-1,1],[-1,-1]]
-
   def deltas
-    DELTA
+    SlidingPiece::DELTA_X
   end
 end
 
 class Queen < SlidingPiece
-  DELTA = [[1,1],[1,-1],[-1,1],[1,1],[0,1],[0,-1],[-1,0],[1,0]]
-
   def deltas
-    DELTA
+    SlidingPiece::DELTA_T + SlidingPiece::DELTA_X
   end
 end
 
 class SteppingPiece < Piece
+  DELTA_KI = [[1, 1], [1, -1], [-1, 1], [0, 1], [0, -1], [-1, 0], [1, 0]]
+  DELTA_KN = [[1, 2], [2, 1], [-1, 2], [-2, 1], [1, -2], [2, -1], [-1, -2], [-2, -1]]
+
   def available_moves
     [].tap do |moves_array|
 
@@ -115,19 +114,20 @@ class SteppingPiece < Piece
 end
 
 class King < SteppingPiece
-  DELTA = [[1,1],[1,-1],[-1,1],[0,1],[0,-1],[-1,0],[1,0]]
 
   def deltas
-    DELTA
+    SteppingPiece::DELTA_KI
   end
 end
 
 class Knight < SteppingPiece
-  DELTA = [[1,2],[2,1],[-1,2],[-2,1],[1,-2],[2,-1],[-1,-2],[-2,-1]]
-
   def deltas
-    DELTA
+    SteppingPiece::DELTA
   end
+
+  # def available_moves
+  #   availble_moves = super unless self.board.in_check?(self.color)
+  # end
 end
 
 class Pawn < Piece

@@ -1,8 +1,3 @@
-require "./piece.rb"
-
-class InvalidMoveError < RuntimeError
-end
-
 class Board
   attr_reader :grid
   SIZE = 8
@@ -135,19 +130,3 @@ class Board
     new_board
   end
 end
-
-
-# chess_board = Board.new
-# puts
-#
-# team_moves = []
-# chess_board.team_pieces(:white).each do |piece|
-#   p "Piece: #{piece.class}"
-#   p "Avail_moves: #{piece.available_moves}"
-#   next if piece.is_a?(Pawn) || piece.nil?
-#   avail_moves = piece.available_moves
-#   next if avail_moves.nil?
-#   team_moves << avail_moves if avail_moves.count > 0
-# end
-#
-# p team_moves

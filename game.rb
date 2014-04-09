@@ -40,8 +40,6 @@ class Game
 
   def display_end_game_message
     puts "Checkmate"
-    puts "END OF GAME."
-    puts "################################################"
   end
 
   def render
@@ -107,11 +105,3 @@ class Game
 end
 
 Game.new.play
-
-#
-# game = Game.new
-# board_var = game.board
-# pos = [0,0]
-# piece = Bishop.new(board_var, pos)
-# # game.board[pos] = rook
-# p piece.available_moves

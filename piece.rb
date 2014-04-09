@@ -1,10 +1,7 @@
-require 'debugger'
-
 class Piece
   attr_accessor :board, :pos, :color
 
   def initialize(board, pos, color)
-    # raise "Not enough information" if board.nil? || pos.nil?
     self.board, self.pos, self.color = board, pos, color
   end
 
@@ -30,12 +27,6 @@ class Piece
 
   def dup(board)
     self.class.new(board, self.pos.dup, self.color)
-  end
-
-  def to_s
-    self.class.to_s[0..1]
-    # self.pos.to_s
-    # self.color.to_s
   end
 end
 
@@ -104,7 +95,6 @@ class Queen < SlidingPiece
 end
 
 class SteppingPiece < Piece
-  # DELTA_KI WAS MISSING [-1, -1]
   DELTA_KI = [[1, 1], [1, -1], [-1, 1], [0, 1], [0, -1], [-1, 0], [1, 0], [-1,-1]]
   DELTA_KN = [[1, 2], [2, 1], [-1, 2], [-2, 1], [1, -2], [2, -1], [-1, -2], [-2, -1]]
 

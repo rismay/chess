@@ -45,8 +45,8 @@ class Board
   def valid_move?(start_pos, end_pos)
     piece = self[start_pos]
 
-    if piece.nil? || !piece.available_moves.include?(end_pos)
-      || puts_player_in_check?(piece, end_pos)
+    if piece.nil? || !piece.available_moves.include?(end_pos) ||
+      puts_player_in_check?(piece, end_pos)
       # We need to catch this exception in the Game class.
       raise InvalidMoveError.new("INPUT ERROR MESSAGE HERE")
       return false
@@ -109,9 +109,9 @@ class Board
     self.grid.flatten.compact.select {|piece| piece.color == color }
   end
 
-  def checkmate?
-    # if either kings have no moves, checkmate.
-    false
+  def checkmate?(color)
+    king = self.find_king(color)
+    in_check?(color) && king.available_moves.empty?
   end
 
   def deep_dup

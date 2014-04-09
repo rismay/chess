@@ -16,6 +16,7 @@ class Game
 
     until game_over?
       puts "Playing..."
+      # rescue InvalidMoveError in here
     end
   end
 

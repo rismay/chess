@@ -1,5 +1,8 @@
 require "./piece.rb"
 
+class InvalidMoveError < RuntimeError
+end
+
 class Board
   attr_reader :grid
   SIZE = 8
@@ -45,7 +48,8 @@ class Board
     # fix this conditional for exceptions
     if piece.nil? || !piece.available_moves.include?(end_pos) || future_check?(piece, end_pos)
       # raise "No piece at that location."
-      raise "Invalid move."
+      # We need to catch this exception in the Game class.
+      raise InvalidMoveError
       return false
     end
 
@@ -90,13 +94,15 @@ class Board
     end
   end
 
+  # WE WERE RECEIVING VALID MOVES AND NILS.
+  # WE NEEDED COMPACT TO REMOVE IT AFTER GATHERING UP ALL THE AVAILABLE MOVES
+  # I THINK THIS IS BECAUSE OF THE PAWN CLASS (GOT BACK 8 NILS)
+  # FIX FOR INFINITE LOOP HERE
   def team_moves(color)
-    # WE WERE RECEIVING VALID MOVES AND NILS.
-    # WE NEEDED COMPACT TO REMOVE IT AFTER GATHERING UP ALL THE AVAILABLE MOVES
-    # I THINK THIS IS BECAUSE OF THE PAWN CLASS (GOT BACK 8 NILS)
     team_pieces(color).map do |piece|
       next if piece.nil?
-      piece.available_moves
+
+      piece.is_a?(King) ? piece.available_moves! : piece.available_moves
     end.compact.flatten(1)
   end
 

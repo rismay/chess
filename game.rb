@@ -78,7 +78,11 @@ class Game
       if self.board.valid_move?(start_pos, end_pos)
         return [start_pos, end_pos]
       else
-        puts "That piece can't go there."
+        if self.board.in_check?(color)
+          puts "Get your shit together. You're checked, mate."
+        else
+          puts "That piece can't go there."
+        end
         next
       end
     end

@@ -48,7 +48,7 @@ class Board
     if piece.nil? || !piece.available_moves.include?(end_pos) ||
       puts_player_in_check?(piece, end_pos)
       # We need to catch this exception in the Game class.
-      raise InvalidMoveError.new("INPUT ERROR MESSAGE HERE")
+      # raise InvalidMoveError.new("INPUT ERROR MESSAGE HERE")
       return false
     end
 
@@ -56,8 +56,7 @@ class Board
   end
 
   def back_row(color, row)
-    piece_classes = [Rook, Bishop, Knight, King, Queen, Knight, Bishop, Rook]
-    piece_classes.reverse! if color == :white
+    piece_classes = [Rook, Knight, Bishop, Queen, King, Bishop, Knight, Rook]
 
     [].tap do |row_array|
       (0...SIZE).each do |col|
@@ -109,9 +108,23 @@ class Board
     self.grid.flatten.compact.select {|piece| piece.color == color }
   end
 
-  def checkmate?(color)
+  def checkmate?(color, ending_pos)
     king = self.find_king(color)
-    in_check?(color) && king.available_moves.empty?
+    team_escape = team_cant_escape_check?(color, ending_pos)
+    in_check?(color) && king.available_moves.empty? && team_escape
+  end
+
+  def team_cant_escape_check?(color, ending_pos)
+    team_pieces(color).each do |piece|
+      possible_moves = piece.available_moves
+      possible_moves.each do |move|
+        duped_board = self.deep_dup
+        duped_board.move!(piece.pos, move)
+        return false if !duped_board.in_check?(color)
+      end
+    end
+
+    true
   end
 
   def deep_dup

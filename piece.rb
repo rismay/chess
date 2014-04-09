@@ -77,17 +77,29 @@ class Rook < SlidingPiece
   def deltas
     SlidingPiece::DELTA_T
   end
+
+  def to_s
+    self.color == :black ? "\u265C".brown : "\u2656".gray
+  end
 end
 
 class Bishop < SlidingPiece
   def deltas
     SlidingPiece::DELTA_X
   end
+
+  def to_s
+    self.color == :black ? "\u265D".brown : "\u2657".gray
+  end
 end
 
 class Queen < SlidingPiece
   def deltas
     SlidingPiece::DELTA_T + SlidingPiece::DELTA_X
+  end
+
+  def to_s
+    self.color == :black ? "\u265B".brown : "\u2655".gray
   end
 end
 
@@ -128,7 +140,14 @@ class King < SteppingPiece
   end
 
   def available_moves
-    super - self.board.team_moves(other_team_color)
+    pre_filtered_moves = super - self.board.team_moves(other_team_color)
+    pre_filtered_moves.reject do |pos|
+      self.board.puts_player_in_check?(self,pos)
+    end
+  end
+
+  def to_s
+    self.color == :black ? "\u265A".brown : "\u2654".gray
   end
 end
 
@@ -136,6 +155,10 @@ end
 class Knight < SteppingPiece
   def deltas
     SteppingPiece::DELTA_KN
+  end
+
+  def to_s
+    self.color == :black ? "\u265E".brown : "\u2658".gray
   end
 end
 
@@ -163,6 +186,11 @@ class Pawn < Piece
     end
   end
 
+  def pos=(position)
+    @pos = position
+    @first_move = false
+  end
+
   def delta_y
     self.color == :black ? DELTA_Y : DELTA_Y.map do |x, y|
       [x * (-1), y * (-1)]
@@ -175,7 +203,6 @@ class Pawn < Piece
 
   def forward_moves
     moves_array = []
-    debugger
     delta.each do |dx, dy|
       new_pos = [self.pos.first + dx, self.pos.last + dy]
       if in_board?(new_pos)
@@ -200,5 +227,9 @@ class Pawn < Piece
         end
       end
     end
+  end
+
+  def to_s
+    self.color == :black ? "\u265F".brown : "\u2659".gray
   end
 end

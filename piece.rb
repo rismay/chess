@@ -20,14 +20,6 @@ class Piece
     self.color == :black ? :white : :black
   end
 
-  def legal_moves
-    available_moves.reject do |possible_move|
-      duped_board = self.board.deep_dup
-      duped_board.move(self.pos, possible_move)
-      duped_board.in_check?(self.color)
-    end
-  end
-
   def enemy?(enemy)
     self.color != enemy.color
   end
@@ -100,17 +92,17 @@ class Queen < SlidingPiece
 end
 
 class SteppingPiece < Piece
-  DELTA_KI = [[1, 1], [1, -1], [-1, 1], [0, 1], [0, -1], [-1, 0], [1, 0]]
+  # DELTA_KI WAS MISSING [-1, -1]
+  DELTA_KI = [[1, 1], [1, -1], [-1, 1], [0, 1], [0, -1], [-1, 0], [1, 0], [-1,-1]]
   DELTA_KN = [[1, 2], [2, 1], [-1, 2], [-2, 1], [1, -2], [2, -1], [-1, -2], [-2, -1]]
 
   def available_moves
     [].tap do |moves_array|
       self.deltas.each do |dx, dy|
         new_pos = [self.pos.first + dx, self.pos.last + dy]
-        piece = self.board[new_pos]
-
-        if in_board?(new_pos) && (piece.nil? || enemy?(piece))
-          moves_array << new_pos
+        if in_board?(new_pos) #
+          piece = board[new_pos]
+          moves_array << new_pos if piece.nil? || enemy?(piece)
         end
       end
     end
@@ -123,8 +115,14 @@ class King < SteppingPiece
     SteppingPiece::DELTA_KI
   end
 
+  # INFINITE LOOP FOUND HERE AT OTHER_TEAM_MOVES
+  # We're iterating try to collect the moves of the other team.
+  # When we do that, it gets to a king and tries to call the available moves
+  # which will then go to this method which will again ask for the
+  # other team's moves.
+  # This is our infinite loop. Fuck this infinite loop.
   def available_moves
-    super - self.board.team_moves(other_team_color)
+    super #- self.board.team_moves(other_team_color)
   end
 end
 

@@ -20,41 +20,30 @@ class Board
   end
 
   def move(start_pos, end_pos)
-    if valid_move?(start_pos, end_pos)
-      piece = self[start_pos]
-
-      piece.pos = end_pos
-
-      self[end_pos] = piece
-      self[start_pos] = nil
-    end
+    move!(start_pos, end_pos) if valid_move?(start_pos, end_pos)
   end
 
-  # def legal_moves
-  #   available_moves.reject do |possible_move|
-  #     duped_board = self.board.deep_dup
-  #     duped_board.move(self.pos, possible_move)
-  #     duped_board.in_check?(self.color)
-  #   end
-  # end
-  #
-  # def future_check?(piece, end_pos)
-  #   duped_board = self.deep_dup
-  #   p duped_piece = duped_board[piece.pos]
-  #   duped_board[end_pos] = duped_piece
-  #   p "Do we get here?"
-  #   p duped_board
-  #   duped_board[piece.pos] = nil
-  #   duped_board.in_check?(piece.color)
-  # end
+  def future_check?(piece, end_pos)
+    duped_board = self.deep_dup
+    duped_board.move!(piece.pos, end_pos)
+    duped_board.in_check?(piece.color)
+  end
+
+  # PIECES ARE MOVING [Y, X] INSTEAD OF [X, Y]
+  def move!(start_pos, end_pos)
+    piece = self[start_pos]
+
+    piece.pos = end_pos
+
+    self[end_pos] = piece
+    self[start_pos] = nil
+  end
 
   def valid_move?(start_pos, end_pos)
-    x, y = start_pos
-    piece = self.grid[x][y]
+    piece = self[start_pos]
 
     # fix this conditional for exceptions
-#|| future_check?(piece, end_pos)
-    if piece.nil? || !piece.available_moves.include?(end_pos)
+    if piece.nil? || !piece.available_moves.include?(end_pos) || future_check?(piece, end_pos)
       # raise "No piece at that location."
       raise "Invalid move."
       return false
@@ -97,12 +86,18 @@ class Board
 
   def find_king(color)
     self.grid.flatten.compact.each do |piece|
-      return piece if piece.color == color && piece.class.is_a?(King)
+      return piece if piece.color == color && piece.is_a?(King)
     end
   end
 
   def team_moves(color)
-    team_pieces(color).map { |piece| piece.available_moves }.flatten(1)
+    # WE WERE RECEIVING VALID MOVES AND NILS.
+    # WE NEEDED COMPACT TO REMOVE IT AFTER GATHERING UP ALL THE AVAILABLE MOVES
+    # I THINK THIS IS BECAUSE OF THE PAWN CLASS (GOT BACK 8 NILS)
+    team_pieces(color).map do |piece|
+      next if piece.nil?
+      piece.available_moves
+    end.compact.flatten(1)
   end
 
   def team_pieces(color)
@@ -123,21 +118,19 @@ class Board
   end
 end
 
-chess_board = Board.new
-puts
-chess_board.grid.each { |row| puts row.join(", ")}
-p chess_board.valid_move?([0,2],[2,1])
-chess_board.move([0,2], [2,3])
-puts "Duped:"
-dupped_board = chess_board.deep_dup
-dupped_board.grid.each { |row| puts row.join(", ")}
-puts "Original:"
-chess_board.move([2,3], [0,2])
-chess_board.grid.each { |row| puts row.join(", ")}
 
-puts "Duped:"
-dupped_board.grid.each { |row| puts row.join(", ")}
-# chess_board.move([7,2],[5,1])
-puts
-# chess_board.grid.each { |row| puts row.join(", ")}
-# p chess_board.grid
+#
+# chess_board = Board.new
+# puts
+#
+# team_moves = []
+# chess_board.team_pieces(:white).each do |piece|
+#   p "Piece: #{piece.class}"
+#   p "Avail_moves: #{piece.available_moves}"
+#   next if piece.is_a?(Pawn) || piece.nil?
+#   avail_moves = piece.available_moves
+#   next if avail_moves.nil?
+#   team_moves << avail_moves if avail_moves.count > 0
+# end
+#
+# p team_moves

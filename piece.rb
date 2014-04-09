@@ -1,7 +1,7 @@
 require 'debugger'
 
 class Piece
-  attr_reader :board, :pos, :color
+  attr_accessor :board, :pos, :color
 
   def initialize(board, pos, color)
     # raise "Not enough information" if board.nil? || pos.nil?
@@ -16,12 +16,16 @@ class Piece
     raise NotImplementedError
   end
 
-  def black?
-    self.color == :black
+  def other_team_color
+    self.color == :black ? :white : :black
   end
 
-  def white?
-    self.color == :white
+  def legal_moves
+    available_moves.reject do |possible_move|
+      duped_board = self.board.deep_dup
+      duped_board.move(self.pos, possible_move)
+      duped_board.in_check?(self.color)
+    end
   end
 
   def enemy?(enemy)
@@ -32,14 +36,15 @@ class Piece
     pos.first.between?(0,7) && pos.last.between?(0,7)
   end
 
+  def dup(board)
+    self.class.new(board, self.pos.dup, self.color)
+  end
+
   def to_s
     self.class.to_s[0..1]
     # self.pos.to_s
     # self.color.to_s
   end
-
-  protected
-  attr_accessor :board, :pos, :color
 end
 
 class SlidingPiece < Piece
@@ -100,7 +105,6 @@ class SteppingPiece < Piece
 
   def available_moves
     [].tap do |moves_array|
-
       self.deltas.each do |dx, dy|
         new_pos = [self.pos.first + dx, self.pos.last + dy]
         piece = self.board[new_pos]
@@ -118,16 +122,16 @@ class King < SteppingPiece
   def deltas
     SteppingPiece::DELTA_KI
   end
+
+  def available_moves
+    super - self.board.team_moves(other_team_color)
+  end
 end
 
 class Knight < SteppingPiece
   def deltas
-    SteppingPiece::DELTA
+    SteppingPiece::DELTA_KN
   end
-
-  # def available_moves
-  #   availble_moves = super unless self.board.in_check?(self.color)
-  # end
 end
 
 class Pawn < Piece

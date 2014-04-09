@@ -4,6 +4,10 @@ class Board
   attr_reader :grid
   SIZE = 8
 
+  def initialize(grid = nil)
+    @grid = grid if grid
+  end
+
   def grid
     @grid ||= Array.new(SIZE) { Array.new(SIZE) }.tap do |grid|
       [:black, :white].each do |color|
@@ -26,11 +30,30 @@ class Board
     end
   end
 
+  # def legal_moves
+  #   available_moves.reject do |possible_move|
+  #     duped_board = self.board.deep_dup
+  #     duped_board.move(self.pos, possible_move)
+  #     duped_board.in_check?(self.color)
+  #   end
+  # end
+  #
+  # def future_check?(piece, end_pos)
+  #   duped_board = self.deep_dup
+  #   p duped_piece = duped_board[piece.pos]
+  #   duped_board[end_pos] = duped_piece
+  #   p "Do we get here?"
+  #   p duped_board
+  #   duped_board[piece.pos] = nil
+  #   duped_board.in_check?(piece.color)
+  # end
+
   def valid_move?(start_pos, end_pos)
     x, y = start_pos
     piece = self.grid[x][y]
 
     # fix this conditional for exceptions
+#|| future_check?(piece, end_pos)
     if piece.nil? || !piece.available_moves.include?(end_pos)
       # raise "No piece at that location."
       raise "Invalid move."
@@ -92,7 +115,7 @@ class Board
   end
 
   def deep_dup
-    new_board = Board.new
+    new_board = Board.new(Array.new(SIZE) { Array.new(SIZE) })
     (team_pieces(:black) + team_pieces(:white)).each do |piece|
       new_board[piece.pos] = piece.dup(new_board)
     end
@@ -103,14 +126,18 @@ end
 chess_board = Board.new
 puts
 chess_board.grid.each { |row| puts row.join(", ")}
-# p chess_board.valid_move?([0,2],[2,1])
+p chess_board.valid_move?([0,2],[2,1])
 chess_board.move([0,2], [2,3])
 puts "Duped:"
-chess_board.deep_dup.grid.each { |row| puts row.join(", ")}
+dupped_board = chess_board.deep_dup
+dupped_board.grid.each { |row| puts row.join(", ")}
 puts "Original:"
 chess_board.move([2,3], [0,2])
 chess_board.grid.each { |row| puts row.join(", ")}
+
+puts "Duped:"
+dupped_board.grid.each { |row| puts row.join(", ")}
 # chess_board.move([7,2],[5,1])
-# puts
+puts
 # chess_board.grid.each { |row| puts row.join(", ")}
 # p chess_board.grid

@@ -5,11 +5,7 @@ class Board
   SIZE = 8
 
   def grid
-    @grid ||= set_grid
-  end
-
-  def set_grid
-    Array.new(SIZE) { Array.new(SIZE) }.tap do |grid|
+    @grid ||= Array.new(SIZE) { Array.new(SIZE) }.tap do |grid|
       [:black, :white].each do |color|
         back_index, front_index = (color == :black) ? [0,1] : [7,6]
 
@@ -20,13 +16,12 @@ class Board
   end
 
   def move(start_pos, end_pos)
-    debugger
     if valid_move?(start_pos, end_pos)
       piece = self[start_pos]
 
       piece.pos = end_pos
 
-      self[end_pos] = piece # fucking problem
+      self[end_pos] = piece
       self[start_pos] = nil
     end
   end
@@ -35,8 +30,10 @@ class Board
     x, y = start_pos
     piece = self.grid[x][y]
 
-    if piece.nil?
-      raise "No piece at that location."
+    # fix this conditional for exceptions
+    if piece.nil? || !piece.available_moves.include?(end_pos)
+      # raise "No piece at that location."
+      raise "Invalid move."
       return false
     end
 
@@ -82,7 +79,7 @@ class Board
   end
 
   def team_moves(color)
-    team_pieces(color).map { |piece| piece.available_positions }.flatten(1)
+    team_pieces(color).map { |piece| piece.available_moves }.flatten(1)
   end
 
   def team_pieces(color)
@@ -93,13 +90,25 @@ class Board
     # if either kings have no moves, checkmate.
     false
   end
+
+  def deep_dup
+    new_board = Board.new
+    (team_pieces(:black) + team_pieces(:white)).each do |piece|
+      new_board[piece.pos] = piece.dup(new_board)
+    end
+    new_board
+  end
 end
 
 chess_board = Board.new
 puts
 chess_board.grid.each { |row| puts row.join(", ")}
 # p chess_board.valid_move?([0,2],[2,1])
-chess_board.move([0,2],[2,3])
+chess_board.move([0,2], [2,3])
+puts "Duped:"
+chess_board.deep_dup.grid.each { |row| puts row.join(", ")}
+puts "Original:"
+chess_board.move([2,3], [0,2])
 chess_board.grid.each { |row| puts row.join(", ")}
 # chess_board.move([7,2],[5,1])
 # puts

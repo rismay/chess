@@ -26,7 +26,7 @@ class Board
     move!(start_pos, end_pos) if valid_move?(start_pos, end_pos)
   end
 
-  def future_check?(piece, end_pos)
+  def puts_player_in_check?(piece, end_pos)
     duped_board = self.deep_dup
     duped_board.move!(piece.pos, end_pos)
     duped_board.in_check?(piece.color)
@@ -45,11 +45,10 @@ class Board
   def valid_move?(start_pos, end_pos)
     piece = self[start_pos]
 
-    # fix this conditional for exceptions
-    if piece.nil? || !piece.available_moves.include?(end_pos) || future_check?(piece, end_pos)
-      # raise "No piece at that location."
+    if piece.nil? || !piece.available_moves.include?(end_pos)
+      || puts_player_in_check?(piece, end_pos)
       # We need to catch this exception in the Game class.
-      raise InvalidMoveError
+      raise InvalidMoveError.new("INPUT ERROR MESSAGE HERE")
       return false
     end
 
@@ -94,15 +93,15 @@ class Board
     end
   end
 
-  # WE WERE RECEIVING VALID MOVES AND NILS.
-  # WE NEEDED COMPACT TO REMOVE IT AFTER GATHERING UP ALL THE AVAILABLE MOVES
-  # I THINK THIS IS BECAUSE OF THE PAWN CLASS (GOT BACK 8 NILS)
-  # FIX FOR INFINITE LOOP HERE
   def team_moves(color)
     team_pieces(color).map do |piece|
       next if piece.nil?
 
-      piece.is_a?(King) ? piece.available_moves! : piece.available_moves
+      if piece.is_a?(King)
+        piece.available_moves!
+      else
+        piece.available_moves
+      end
     end.compact.flatten(1)
   end
 
@@ -125,7 +124,6 @@ class Board
 end
 
 
-#
 # chess_board = Board.new
 # puts
 #

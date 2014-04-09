@@ -100,7 +100,7 @@ class SteppingPiece < Piece
     [].tap do |moves_array|
       self.deltas.each do |dx, dy|
         new_pos = [self.pos.first + dx, self.pos.last + dy]
-        if in_board?(new_pos) #
+        if in_board?(new_pos)
           piece = board[new_pos]
           moves_array << new_pos if piece.nil? || enemy?(piece)
         end
@@ -115,16 +115,11 @@ class King < SteppingPiece
     SteppingPiece::DELTA_KI
   end
 
-  # FIX FOR INFINITE LOOP
-  # We can call a available_moves! method here which we will call in
-  # our #team_moves method if the piece is a King. This stops the infinite
-  # loop by returning the enemy King's available position without
-  # checking the enemy's position (which we don't need).
   def available_moves!
     [].tap do |moves_array|
       self.deltas.each do |dx, dy|
         new_pos = [self.pos.first + dx, self.pos.last + dy]
-        if in_board?(new_pos) #
+        if in_board?(new_pos)
           piece = board[new_pos]
           moves_array << new_pos if piece.nil? || enemy?(piece)
         end
@@ -132,15 +127,8 @@ class King < SteppingPiece
     end
   end
 
-
-  # INFINITE LOOP FOUND HERE AT OTHER_TEAM_MOVES
-  # We're iterating try to collect the moves of the other team.
-  # When we do that, it gets to a king and tries to call the available moves
-  # which will then go to this method which will again ask for the
-  # other team's moves.
-  # This is our infinite loop. Fuck this infinite loop.
   def available_moves
-    super #- self.board.team_moves(other_team_color)
+    super - self.board.team_moves(other_team_color)
   end
 end
 
@@ -159,6 +147,8 @@ class Pawn < Piece
   end
 
   def available_moves
+    # Delta for black or white
+
     # [].tap do |moves_array|
     #   [0,1] || [0,-1]
     # end
